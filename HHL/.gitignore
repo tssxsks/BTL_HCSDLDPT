@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+.env
+.env.*
+!.env.example
+
+.venv/
+venv/
+env/
+ENV/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+*.log
+logs/
+
+build/
+dist/
+*.egg-info/
+
+# dataset/MainData/
+# dataset/FullData/
+# dataset/Test/
+
+# uploads/

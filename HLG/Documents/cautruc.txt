@@ -1,0 +1,151 @@
+CAU TRUC PROJECT HIEN TAI CHO BAI TOAN LUU TRU VA TIM KIEM ANH MAT TRE EM
+
+1. Muc tieu project
+- Luu tru bo du lieu anh khuon mat tre em trong PostgreSQL.
+- Trich xuat dac trung HOG, histogram mau HSV va facial landmarks.
+- Tim kiem voi dau vao la 1 anh query va tra ve top-5 anh gan nhat.
+- Demo bang giao dien desktop Python thay vi web browser.
+
+2. Cay thu muc hien tai
+
+BTL/
+|-- .git/
+|-- .env
+|-- .env.example
+|-- .gitignore
+|-- requirements.txt
+|-- features.py
+|-- database_manager.py
+|-- app.py
+|-- test_connection.py
+|-- DL.ipynb
+|-- dataset/
+|   |-- MainData/
+|   |-- FullData/
+|   `-- Test/
+|-- Documents/
+|   |-- Debai.txt
+|   `-- cautruc.txt
+`-- __pycache__/
+
+3. Vai tro tung thanh phan
+
+- .env:
+  Chua thong tin ket noi PostgreSQL nhu PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD.
+
+- .env.example:
+  Mau cau hinh de tao file .env.
+
+- .gitignore:
+  Bo qua cache Python, virtual environment, file .env va cac thu muc dataset lon.
+
+- requirements.txt:
+  Danh sach cac thu vien can cai cho project:
+  mediapipe, numpy, opencv-python, Pillow, psycopg2-binary, scikit-image.
+
+- features.py:
+  Module trich xuat dac trung.
+  Bao gom:
+  + resize anh ve 200x200
+  + color histogram HSV 8x8x8
+  + HOG
+  + landmarks bang MediaPipe Face Mesh
+
+- database_manager.py:
+  Script ETL va quan ly CSDL.
+  Bao gom:
+  + tao bang face_images va image_features
+  + drop bang neu can
+  + truncate bang neu can
+  + doc anh tu dataset/MainData
+  + parse metadata tu ten file
+  + trich xuat dac trung bang features.py
+  + bulk insert vao PostgreSQL
+
+- app.py:
+  Giao dien desktop bang Tkinter.
+  Bao gom:
+  + chon anh query tu may
+  + hien preview anh query
+  + tai feature vectors tu PostgreSQL
+  + tinh cosine similarity cho HOG, mau sac, landmark
+  + min-max normalization
+  + weighted fusion
+  + hien top-5 ket qua gan nhat
+
+- test_connection.py:
+  Script test ket noi PostgreSQL.
+
+- DL.ipynb:
+  Notebook thu nghiem, phan tich va demo trong qua trinh phat trien.
+
+- dataset/MainData:
+  Tap du lieu chinh de dua vao ETL va tim kiem.
+  Day la thu muc duoc database_manager.py doc mac dinh.
+
+- dataset/FullData:
+  Tap du lieu lon hon, de luu tru hoac doi chieu khi can.
+
+- dataset/Test:
+  Tap anh test rieng.
+
+- Documents/Debai.txt:
+  Noi dung de bai.
+
+- Documents/cautruc.txt:
+  Mo ta cau truc project hien tai.
+
+4. Cau truc CSDL dang dung
+
+- Bang face_images
+  + id: SERIAL PRIMARY KEY
+  + image_path: TEXT
+  + age: INT
+  + gender: INT
+  + race: INT
+
+- Bang image_features
+  + image_id: INT, khoa ngoai toi face_images(id)
+  + hog: FLOAT8[]
+  + color_hist: FLOAT8[]
+  + landmark: FLOAT8[]
+
+5. Luong chay thuc te
+
+Buoc 1:
+Tao file .env voi thong tin ket noi PostgreSQL.
+
+Buoc 2:
+Nap du lieu vao CSDL:
+python database_manager.py --drop-existing
+
+Neu khong muon drop bang ma chi muon xoa du lieu:
+python database_manager.py --reset
+
+Buoc 3:
+Mo giao dien tim kiem:
+python app.py
+
+Buoc 4:
+Chon 1 anh query trong giao dien desktop va xem top-5 ket qua.
+
+6. Anh xa truc tiep voi yeu cau de bai
+
+- Yeu cau tien xu ly va trich xuat dac trung:
+  features.py
+
+- Yeu cau luu metadata va vectors vao PostgreSQL:
+  database_manager.py
+
+- Yeu cau tim top-5 anh gan nhat:
+  app.py
+
+- Yeu cau demo he thong:
+  app.py + dataset/MainData + PostgreSQL
+
+7. Ghi chu quan trong
+
+- Hien tai project khong dung cau truc src/, tests/, outputs/ nhu ban de xuat ban dau.
+- Dataset duoc dat truc tiep trong dataset/MainData va duoc xu ly tu thu muc nay.
+- Giao dien hien tai la desktop GUI, khong phai Flask/FastAPI web app.
+- Neu du lieu nguon co file gan nhan sai, ket qua tim kiem van co the tra ve anh sai nhan.

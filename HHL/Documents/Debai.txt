@@ -1,0 +1,8 @@
+Xây dựng hệ CSDL lưu trữ và tìm kiếm ảnh mặt trẻ em.
+1.Hãy xây dựng/sưu tầm một bộ dữ liệu ảnh gồm ít nhất 500 files ảnh chân dung trẻ em, các ảnh có cùng kích thước, vật trong ảnh có cùng tỉ lệ khung hình (SV tùy chọn định dạng ảnh).
+2.Hãy xây dựng một bộ thuộc tính để nhận diện ảnh mặt trẻ em từ bộ dữ liệu đã thu thập (gồm các thuộc tính thể hiện độ tương đồng giữa các khuôn mặt trẻ em và thuộc tính thể hiện sự khác nhau giữa các khuôn mặt trẻ em trong các bức ảnh). Trình bày cụ thể vể lý do lựa chọn cùng giá trị thông tin của các thuộc tính được sử dụng.
+3. Xây dựng CSDL để quản trị các siêu dữ liệu đã có, và phục vụ quá trình tìm kiếm ảnh trên các siêu dữ liệu đó.
+4.Xây dựng hệ thống tìm kiếm ảnh mặt trẻ em với đầu vào là một ảnh mới về mặt trẻ em (ảnh của người đã có và không có trong dữ liệu), đầu ra là 5 ảnh giống nhất, xếp thứ tự giảm dần về độ tương đồng nội dung với ảnh đầu vào.
+a.Trình bày sơ đồ khối của hệ thống và quy trình thực hiện yêu cầu của đề bài.
+b.Trình bày các kết quả trung gian trong quá trình tìm kiếm ảnh trong hệ thống.
+5.Demo hệ thống và đánh giá kết quả đã đạt được.
