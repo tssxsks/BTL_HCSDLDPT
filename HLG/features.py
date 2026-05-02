@@ -141,9 +141,7 @@ class FeatureExtractor:
             [hsv_image], [0, 1, 2], None,
             list(COLOR_HIST_BINS), [0, 180, 0, 256, 0, 256],
         )
-        histogram = cv2.normalize(
-            histogram, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX,
-        )
+        cv2.normalize(histogram, histogram)
         return histogram.flatten().astype(np.float64)
 
     def extract_lbp(self, image: np.ndarray) -> np.ndarray:
