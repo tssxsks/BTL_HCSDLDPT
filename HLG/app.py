@@ -344,14 +344,32 @@ class ChildFaceRetrievalApp(tk.Tk):
         btn_row.pack(fill="x", padx=15, pady=10)
         self.choose_button = tk.Button(btn_row, text="Chọn ảnh", command=self.choose_image, bg="#2f5fd0", fg="white", relief="flat", font=("Segoe UI", 9, "bold"), cursor="hand2", padx=10)
         self.choose_button.pack(side="left")
-        self.search_button = tk.Button(btn_row, text="Tìm kiếm", command=self.start_search, state="disabled", bg="#2f5fd0", fg="white", relief="flat", font=("Segoe UI", 9, "bold"), cursor="hand2", padx=10)
+        self.search_button = tk.Button(btn_row, text="Tìm kiếm", command=self.start_search, state="disabled", bg="#b0b8cc", fg="#ffffff", relief="flat", font=("Segoe UI", 9, "bold"), cursor="hand2", padx=10, disabledforeground="#ffffff")
         self.search_button.pack(side="left", padx=5)
 
         # Thông tin file và trạng thái
         info_box = tk.Frame(control_card, bg="#f7f9fc", highlightbackground="#e3e9f3", highlightthickness=1)
         info_box.pack(fill="x", padx=15, pady=(0, 15))
-        tk.Label(info_box, textvariable=self.file_var, bg="#f7f9fc", fg="#334155", font=("Segoe UI", 8), anchor="w", wraplength=280).pack(fill="x", padx=8, pady=5)
-        tk.Label(info_box, textvariable=self.status_var, bg="#f7f9fc", fg="#2f5fd0", font=("Segoe UI", 8, "italic"), anchor="w").pack(fill="x", padx=8, pady=(0, 5))
+        info_inner = tk.Frame(info_box, bg="#f7f9fc")
+        info_inner.pack(fill="x", padx=8, pady=(6, 2))
+        self.info_text = tk.Text(
+            info_inner, height=2, bg="#f7f9fc", fg="#334155",
+            font=("Segoe UI", 8), relief="flat", wrap="none",
+            state="disabled", cursor="arrow", borderwidth=0,
+        )
+        self.info_xscroll = tk.Scrollbar(info_inner, orient="horizontal", command=self.info_text.xview)
+
+        def _autohide_scroll(first, last):
+            if float(first) <= 0.0 and float(last) >= 1.0:
+                self.info_xscroll.pack_forget()
+            else:
+                self.info_xscroll.pack(fill="x")
+
+        self.info_text.configure(xscrollcommand=_autohide_scroll)
+        self.info_text.pack(fill="x")
+        self.file_var.trace_add("write", lambda *_: self._update_info_text())
+        self._update_info_text()
+        tk.Label(info_box, textvariable=self.status_var, bg="#f7f9fc", fg="#2f5fd0", font=("Segoe UI", 8, "italic"), anchor="w").pack(fill="x", padx=8, pady=(2, 6))
 
         # Card Xem trước ảnh Query
         preview_card = tk.Frame(left_panel, bg="white", bd=1, relief="solid", highlightbackground="#d7dfec", highlightthickness=1)
@@ -401,7 +419,7 @@ class ChildFaceRetrievalApp(tk.Tk):
         self.selected_image_path = Path(path)
         self.file_var.set(self._format_selected_file_text(self.selected_image_path))
         self.status_var.set("Sẵn sàng tìm kiếm.")
-        self.search_button.config(state="normal")
+        self.search_button.config(state="normal", bg="#2f5fd0", fg="white")
         self._set_query_preview(self.selected_image_path)
         self._clear_results()
 
@@ -410,7 +428,7 @@ class ChildFaceRetrievalApp(tk.Tk):
         self.is_searching = True
         self.status_var.set("Đang xử lý đặc trưng...")
         self.elapsed_var.set("Thời gian tìm kiếm: Đang xử lý...")
-        self.search_button.config(state="disabled"); self.choose_button.config(state="disabled")
+        self.search_button.config(state="disabled", bg="#b0b8cc", fg="white"); self.choose_button.config(state="disabled")
         self._clear_results()
         threading.Thread(target=self._search_worker, daemon=True).start()
 
@@ -423,7 +441,7 @@ class ChildFaceRetrievalApp(tk.Tk):
 
     def _render_results(self, results: list[SearchResult], elapsed_ms: float) -> None:
         self.is_searching = False
-        self.search_button.config(state="normal"); self.choose_button.config(state="normal")
+        self.search_button.config(state="normal", bg="#2f5fd0", fg="white"); self.choose_button.config(state="normal")
         self.status_var.set("Tìm kiếm hoàn tất.")
         self.elapsed_var.set(f"Thời gian tìm kiếm: {elapsed_ms:.2f} ms")
         self.result_title_var.set(f"{len(results)} Ảnh tương đồng nhất")
@@ -518,6 +536,12 @@ class ChildFaceRetrievalApp(tk.Tk):
             rel = path.resolve().relative_to(BASE_DIR)
             return f"Tệp: {path.name}\nĐường dẫn: {rel.as_posix()}"
         except ValueError: return f"Tệp: {path.name}"
+
+    def _update_info_text(self) -> None:
+        self.info_text.config(state="normal")
+        self.info_text.delete("1.0", "end")
+        self.info_text.insert("1.0", self.file_var.get())
+        self.info_text.config(state="disabled")
 
 def shutdown_resources() -> None:
     _FEATURE_EXTRACTOR.close()
