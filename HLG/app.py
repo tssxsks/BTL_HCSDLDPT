@@ -23,6 +23,8 @@ from features import (
     LBP_LENGTH,
     GEOMETRIC_RATIOS_LENGTH,
     FeatureExtractor,
+    min_max_normalize_matrix,
+    min_max_normalize_vector,
 )
 
 # Nạp cấu hình từ file .env
@@ -69,6 +71,8 @@ class SearchIndex:
     color_hist: np.ndarray
     lbp: np.ndarray
     geometric_ratios: np.ndarray
+    geometric_min: np.ndarray | None = None
+    geometric_max: np.ndarray | None = None
 
     @property
     def size(self) -> int:
@@ -224,7 +228,15 @@ def load_search_index() -> SearchIndex:
     if not metadata:
         return SearchIndex([], np.empty((0, 0)), np.empty((0, 0)), np.empty((0, 0)))
 
-    return SearchIndex(metadata, np.vstack(color_vectors), np.vstack(lbp_vectors), np.vstack(geometric_vectors))
+    geometric_matrix, geometric_min, geometric_max = min_max_normalize_matrix(np.vstack(geometric_vectors))
+    return SearchIndex(
+        metadata,
+        np.vstack(color_vectors),
+        np.vstack(lbp_vectors),
+        geometric_matrix,
+        geometric_min,
+        geometric_max,
+    )
 
 def cosine_similarity(query_vector: np.ndarray, matrix: np.ndarray) -> np.ndarray:
     query = np.asarray(query_vector, dtype=np.float64)
@@ -248,9 +260,17 @@ def search_similar_images(query_path: Path, top_k: int = TOP_K) -> tuple[list[Se
     if search_index.size == 0:
         raise ValueError("Không tìm thấy ảnh đã lập chỉ mục trong cơ sở dữ liệu.")
 
+    query_geometric = query_features.geometric_ratios
+    if search_index.geometric_min is not None and search_index.geometric_max is not None:
+        query_geometric = min_max_normalize_vector(
+            query_geometric,
+            search_index.geometric_min,
+            search_index.geometric_max,
+        )
+
     h_sim = cosine_similarity(query_features.color_hist, search_index.color_hist)
     l_sim = cosine_similarity(query_features.lbp, search_index.lbp)
-    g_sim = cosine_similarity(query_features.geometric_ratios, search_index.geometric_ratios)
+    g_sim = cosine_similarity(query_geometric, search_index.geometric_ratios)
 
     h_norm = min_max_normalize(h_sim)
     l_norm = min_max_normalize(l_sim)

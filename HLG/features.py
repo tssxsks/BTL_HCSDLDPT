@@ -26,6 +26,7 @@ LBP_LENGTH = 256  # 2^P = 256 bins (full histogram)
 
 # Geometric Ratios config
 GEOMETRIC_RATIOS_LENGTH = 6
+MIN_MAX_EPSILON = 1e-10
 
 # MediaPipe Face Mesh key landmark indices
 _LEFT_EYE_OUTER = 33
@@ -105,6 +106,42 @@ def decode_image_bytes(data: bytes) -> np.ndarray:
     if image is None:
         raise ValueError("Uploaded file is not a valid image.")
     return ensure_bgr_image(image)
+
+
+def min_max_normalize_vector(
+    vector: np.ndarray | list[float],
+    feature_min: np.ndarray | list[float],
+    feature_max: np.ndarray | list[float],
+) -> np.ndarray:
+    values = np.asarray(vector, dtype=np.float64)
+    lower = np.asarray(feature_min, dtype=np.float64)
+    upper = np.asarray(feature_max, dtype=np.float64)
+    if values.shape != lower.shape or values.shape != upper.shape:
+        raise ValueError("Vector, feature_min, and feature_max must have the same shape.")
+    return np.clip(
+        (values - lower) / ((upper - lower) + MIN_MAX_EPSILON),
+        0.0,
+        1.0,
+    ).astype(np.float64)
+
+
+def min_max_normalize_matrix(
+    matrix: np.ndarray | list[list[float]],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    values = np.asarray(matrix, dtype=np.float64)
+    if values.ndim != 2:
+        raise ValueError("Min-max normalization expects a 2D matrix.")
+    if values.shape[0] == 0:
+        raise ValueError("Cannot normalize an empty matrix.")
+
+    feature_min = values.min(axis=0)
+    feature_max = values.max(axis=0)
+    normalized = np.clip(
+        (values - feature_min) / ((feature_max - feature_min) + MIN_MAX_EPSILON),
+        0.0,
+        1.0,
+    )
+    return normalized.astype(np.float64), feature_min.astype(np.float64), feature_max.astype(np.float64)
 
 
 class FeatureExtractor:
